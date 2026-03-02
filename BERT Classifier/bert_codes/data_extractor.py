@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 # Sample the given dataframe df to select n_sample number of points. 
 def stratified_sample_df(df, col, n_samples,sampled='stratified',random_state=1):
@@ -28,7 +29,9 @@ def data_collector(file_names,params,is_train):
     if(is_train!=True):
         df_test=[]
         for file in file_names:
-            lang_temp=file.split('/')[-1][:-index]
+            # Use os.path.basename to get filename and handle both Windows and Unix paths
+            filename = os.path.basename(file)
+            lang_temp=filename[:-index]
             if(lang_temp==language):
                 df_test.append(pd.read_csv(file))
         df_test=pd.concat(df_test,axis=0)
@@ -39,8 +42,9 @@ def data_collector(file_names,params,is_train):
         if(type_train=='baseline'):
             df_test=[]
             for file in file_names:
-
-                lang_temp=file.split('/')[-1][:-index]
+                # Use os.path.basename to get filename and handle both Windows and Unix paths
+                filename = os.path.basename(file)
+                lang_temp=filename[:-index]
                 print(lang_temp)
 
                 if(lang_temp==language):

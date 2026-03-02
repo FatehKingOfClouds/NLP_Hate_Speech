@@ -13,6 +13,6 @@
 	1. Similar to the instructions above, set the required parameters for target language, bert model to be used and sample ratio of the target dataset.
 	2. Set the `how_train` parameter to `all_but_one`. Now data_loader function will load the datasets all other language fully, and the dataset for the target language in the given sample ratio. 
 
-3. **Translation + BERT Baseline**
+<!-- 3. **Translation + BERT Baseline**
 	1. Set the language and other parameters similar to mBERT baseline case. 
-	2. Set the `csv_file` parameter to `*_translated.csv`. Now data_loader function will load the csv files containing the texts translated to English.
+	2. Set the `csv_file` parameter to `*_translated.csv`. Now data_loader function will load the csv files containing the texts translated to English. -->

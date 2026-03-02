@@ -32,14 +32,17 @@ else:
     device = torch.device("cpu")
 
 # Set the gpu device 
-print("current gpu device", torch.cuda.current_device())
-torch.cuda.set_device(0)
-print("current gpu device",torch.cuda.current_device())
+# print("current gpu device", torch.cuda.current_device())
+# torch.cuda.set_device(0)
+# print("current gpu device",torch.cuda.current_device())
 
 
 # Initialize neptune for logging the parameters and metrics
-neptune.init(project_name,api_token=api_token,proxies=proxies)
-neptune.set_project(project_name)
+try:
+    neptune.init(project_name,api_token=api_token,proxies=proxies)
+except:
+    print("⚠️ Skipping Neptune logging (running offline)")
+    neptune = None
   
 # The main function that does the training
 
@@ -47,15 +50,23 @@ def train_model(params,best_val_fscore):
 	
 	# In case of english languages, translation is the origin data itself.
 	if(params['language']=='English'):
-		params['csv_file']='*_full.csv'
+		csv_pattern='*_full.csv'
+	else:
+		csv_pattern='*_translated.csv'
 	
-
-	train_path=params['files']+'/train/'+params['csv_file']
-	val_path=params['files']+'/val/'+params['csv_file']
+	# Filter by language name to load only that language's dataset
+	# Use os.path.join for proper path construction on Windows
+	train_path=os.path.join(params['files'], 'train', params['language']+'*_full.csv')
+	val_path=os.path.join(params['files'], 'val', params['language']+'*_full.csv')
 
 	# Load the training and validation datasets
 	train_files=glob.glob(train_path)
 	val_files=glob.glob(val_path)
+	
+	# Debug: Print found files
+	print(f"Looking for files matching: {train_path}")
+	print(f"Found {len(train_files)} training files: {train_files}")
+	print(f"Found {len(val_files)} validation files: {val_files}")
 	
 	#Load the bert tokenizer
 	print('Loading BERT tokenizer...')
@@ -64,12 +75,9 @@ def train_model(params,best_val_fscore):
 	df_val=data_collector(val_files,params,False)
 	
 	# Get the comment texts and corresponding labels
-	if(params['csv_file']=='*_full.csv'):
-		sentences_train = df_train.text.values
-		sentences_val = df_val.text.values
-	elif(params['csv_file']=='*_translated.csv'):
-		sentences_train = df_train.translated.values
-		sentences_val = df_val.translated.values
+	# Always use untranslated data when loading by language name
+	sentences_train = df_train.text.values
+	sentences_val = df_val.text.values
 	
 	labels_train = df_train.label.values
 	labels_val = df_val.label.values
@@ -81,7 +89,9 @@ def train_model(params,best_val_fscore):
 	# Select the required bert model. Refer below for explanation of the parameter values.
 	model=select_model(params['what_bert'],params['path_files'],params['weights'])
 	# Tell pytorch to run this model on the GPU.
-	model.cuda()
+	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+	model = model.to(device)
+	print(f"Model moved to: {device}")
 
 	# Do the required encoding using the bert tokenizer
 	input_train_ids,att_masks_train=combine_features(sentences_train,tokenizer,params['max_length'])
@@ -212,7 +222,7 @@ def train_model(params,best_val_fscore):
 		neptune.stop()	
 	del model
 	torch.cuda.empty_cache()
-	return fscore,best_val_fscore
+	return val_fscore,best_val_fscore
 
 
 
@@ -241,8 +251,8 @@ def train_model(params,best_val_fscore):
 # 'random_seed': seed value for reproducibility
 
 params={
-	'logging':'neptune',
-	'language':'English',
+	'logging':'local',
+	'language':'French',
 	'is_train':True,
 	'is_model':True,
 	'learning_rate':2e-5,
@@ -250,7 +260,7 @@ params={
 	'csv_file':'*_full.csv',
 	'samp_strategy':'stratified',
 	'epsilon':1e-8,
-	'path_files':'multilingual_bert',
+	'path_files':'./BERT Classifier/multilingual_bert',
 	'take_ratio':False,
 	'sample_ratio':16,
 	'how_train':'baseline',
@@ -269,36 +279,9 @@ params={
 
 if __name__=='__main__':
 
-	lang_map={'Arabic':'ar','French':'fr','Portugese':'pt','Spanish':'es','English':'en','Indonesian':'id','Italian':'it','German':'de','Polish':'pl','Spanish':
-	'es','French':'fr'}
-	# torch.cuda.set_device(0)
-
-	lang_list=list(lang_map.keys())
-	for lang in lang_list[0:3]:
-		params['language']=lang
-		for sample_ratio,take_ratio in [(16,False),(32,False),(64,False),(128,False),(256,False)]:
-			count=0
-			params['take_ratio']=take_ratio
-			params['sample_ratio']=sample_ratio
-			best_val_fscore=0
-			for lr in [2e-5,3e-5,5e-5]:
-				params['learning_rate']=lr
-				for ss in ['stratified','equal']:
-					params['samp_strategy']=ss
-					for seed in [2018,2019,2020,2021,2022]:
-						params['random_seed']=seed
-						count+=1
-						_,best_val_fscore=train_model(params,best_val_fscore)
-
-
-		best_val_fscore=00
-		for lr in [2e-5,3e-5,5e-5]:
-			params['learning_rate']=lr
-			params['samp_strategy']='stratified'
-			for seed in [2018,2019,2020,2021,2022][:1]:
-				params['random_seed']=seed
-				_,best_val_fscore=train_model(params,best_val_fscore)
-		print('============================')
-		print('Model for Language',lang,'is trained')
-		print('============================')
+	best_val_fscore = 0
+	_,best_val_fscore = train_model(params, best_val_fscore)
+	print('============================')
+	print(f'Model for Language {params["language"]} trained successfully!')
+	print('============================' )
 		
