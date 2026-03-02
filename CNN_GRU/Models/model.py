@@ -36,9 +36,10 @@ class CNN_GRU(nn.Module):
         output=self.out(global_h_seq)
         
         if labels is not None:
-        	loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(self.weights).cuda())
-        	loss = loss_fct(output.view(-1, self.num_labels), labels.view(-1))
-        	return loss,output
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(self.weights).to(device))
+            loss = loss_fct(output.view(-1, self.num_labels), labels.view(-1))
+            return loss,output
         return output
 
         

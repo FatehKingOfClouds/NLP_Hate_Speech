@@ -31,8 +31,13 @@ else:
 
 
 # Initialize neptune for logging
-neptune.init(project_name,api_token=api_token,proxies=proxies)
-neptune.set_project(project_name)
+try:
+    neptune.init(project_name,api_token=api_token,proxies=proxies)
+except:
+    print("⚠️ Skipping Neptune logging (running offline)")
+    neptune = None
+	
+# neptune.set_project(project_name)
 
 
 # The function for evaluating

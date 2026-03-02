@@ -14,5 +14,6 @@ In the above datasets, some of them contain multiple labels for the text such as
 ## Instructions for getting the datasets
 1. Download the datasets from the above sources and place it in the subfolder `Dataset/full_data`
 2. Rename the files for each language respectively `Arabic_1b_full.csv`, `English_2e_full.csv`, `French_9a_full.csv`
-3. Use the `Translation.ipynb ` to translate the datasets into english
-4. Use the ids given in `ID Mapping` folder for splitting the datasets into train, val and test splits. Use the file `Stratified Split.ipynb` for doing the splits. 
+3. Please run the `Pre-Processing.ipynb` file for the necessary preprocessing treatment.
+4. After that, use the `Train_test_validation.ipynb` notebook. This will allow a stratisfied splitting of all datasets into 70% Train, 20% Test and 10% Validation. This step will results in the creation of the csv files for the ID Mapping.
+5. Use the ids given in `ID Mapping` folder for splitting the datasets into train, val and test splits. Use the file `Stratified Split.ipynb` for doing the splits. 

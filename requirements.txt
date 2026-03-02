@@ -2,7 +2,8 @@ emoji==1.7.0
 numpy==1.26.4
 knockknock==0.1.7
 transformers==4.36.2
-Keras==3.0.5
+Keras==2.15.0
+tensorflow==2.15.0
 neptune-client==0.9.19
 torch==2.1.0
 tqdm==4.66.2

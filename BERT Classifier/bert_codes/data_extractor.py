@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 
 # Sample the given dataframe df to select n_sample number of points. 
 def stratified_sample_df(df, col, n_samples,sampled='stratified',random_state=1):
@@ -27,10 +28,18 @@ def data_collector(file_names,params,is_train):
     # If the data being loaded is not train, i.e. either val or test, load everything and return
     if(is_train!=True):
         df_test=[]
-        for file in file_names:
-            lang_temp=file.split('/')[-1][:-index]
-            if(lang_temp==language):
+        # For 'all' mode, load all files regardless of language
+        if(type_train=='all'):
+            for file in file_names:
                 df_test.append(pd.read_csv(file))
+        else:
+            # For other modes, filter by language
+            for file in file_names:
+                # Use os.path.basename to get filename and handle both Windows and Unix paths
+                filename = os.path.basename(file)
+                lang_temp=filename[:-index]
+                if(lang_temp==language):
+                    df_test.append(pd.read_csv(file))
         df_test=pd.concat(df_test,axis=0)
         return df_test
     # If train data is being loaded, 
@@ -39,16 +48,24 @@ def data_collector(file_names,params,is_train):
         if(type_train=='baseline'):
             df_test=[]
             for file in file_names:
-
-                lang_temp=file.split('/')[-1][:-index]
+                # Use os.path.basename to get filename and handle both Windows and Unix paths
+                filename = os.path.basename(file)
+                lang_temp=filename[:-index]
                 print(lang_temp)
 
                 if(lang_temp==language):
                     temp=pd.read_csv(file)
                     df_test.append(temp)
             df_test=pd.concat(df_test,axis=0)
+        # All setting - load all language data
+        elif(type_train=='all'):
+            df_test=[]
+            for file in file_names:
+                temp=pd.read_csv(file)
+                df_test.append(temp)
+            df_test=pd.concat(df_test,axis=0)
         # Zero shot setting - all except target language loaded
-        if(type_train=='zero_shot'):
+        elif(type_train=='zero_shot'):
             df_test=[]
             for file in file_names:
                 lang_temp=file.split('/')[-1][:-index]
@@ -59,7 +76,7 @@ def data_collector(file_names,params,is_train):
             df_test=pd.concat(df_test,axis=0)
 
         # All_but_one - all other languages fully loaded, target language sampled
-        if(type_train=='all_but_one'):
+        elif(type_train=='all_but_one'):
             df_test=[]
             for file in file_names:
                 lang_temp=file.split('/')[-1][:-index]

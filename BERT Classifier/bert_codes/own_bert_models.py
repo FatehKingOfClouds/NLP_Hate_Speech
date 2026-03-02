@@ -1,5 +1,4 @@
-from transformers.modeling_bert import *
-
+from transformers.models.bert.modeling_bert import *
 
 # Function to select model based on parameters passed
 def select_model(type_of_model,path,weights=None,label_list=None):
