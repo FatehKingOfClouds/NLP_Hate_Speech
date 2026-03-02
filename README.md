@@ -1,19 +1,120 @@
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhate-alert%2FDE-LIMIT&count_bg=%2379C83D&title_bg=%23555555&icon=adblock.svg&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/punyajoy/DE-LIMIT/issues)
-# Deep Learning Models for Multilingual Hate Speech Detection
-:portugal: :saudi_arabia: :poland: :indonesia: :it: Solving the problem of **hate speech detection** in **9 languages** across **16 datasets**.
-:fr: :us: :es: :de:
+# Multilingual Hate Speech Detection Benchmark
 
-### New update -- :tada: :tada: all our BERT models are available [here](https://huggingface.co/Hate-speech-CNERG). Be sure to check it out :tada: :tada:.
+This repository implements a benchmark comparison of three deep learning approaches for multilingual hate speech detection across 9 languages. The implementation is based on the DE-LIMIT dataset and uses the foundational work by [Aluru et al. (2021)](https://arxiv.org/abs/2004.06465) as a skeleton for our implementation.
 
-### Demo 
+## Overview
 
-Please look [here](Example/N_Class_model.ipynb) to check model loading and inference.
+This project compares three different neural architectures for hate speech classification:
 
+1. **BERT Classifier** - Multilingual BERT (mBERT) fine-tuning approach
+2. **CNN-GRU** - CNN-GRU model with MUSE word embeddings
+3. **XLM-RoBERTa** - Cross-lingual RoBERTa for multilingual transfer learning
 
-***Please cite our paper in any published work that uses any of these resources.***
+Each model can be trained on different language combinations and evaluated on the DE-LIMIT dataset.
 
-~~~bibtex
+## Directory Structure
+
+```
+DE-LIMIT-master/
+├── Dataset/                 # Dataset folder with train/val/test splits
+│   ├── full_data/          # Raw text files
+│   ├── train/              # Training data (language-specific CSVs)
+│   ├── val/                # Validation data (language-specific CSVs)
+│   └── test/               # Test data (language-specific CSVs)
+├── BERT Classifier/         # mBERT fine-tuning implementation
+│   ├── bert_codes/         # Core modules for feature generation and utilities
+│   ├── BERT_training_inference.py
+│   ├── BERT_inference.py
+│   └── README.md           # Detailed instructions for BERT models
+├── CNN_GRU/                # CNN-GRU model implementation
+│   ├── Models/             # Model architecture definitions
+│   ├── Preprocess/         # Data preprocessing with Ekphrasis
+│   ├── bert_codes/         # Feature generation and utilities
+│   ├── CNN_GRU.py
+│   └── README.md           # Detailed instructions for CNN-GRU model
+├── XLM_RoBERTa/            # XLM-RoBERTa implementation
+│   ├── xlm_codes/          # Core modules for feature generation and utilities
+│   ├── XLM_RoBERTa_training_inference.py
+│   ├── test_xlmr_hatespeech.py
+│   ├── download_model.py
+│   └── README.md           # Detailed instructions for XLM-RoBERTa model
+├── LASER+LR/               # Logistic regression on LASER embeddings
+├── Example/                # Example notebooks for model usage
+└── README.md               # This file
+```
+
+## Requirements
+
+Make sure to use **Python 3.8+**. Install dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Dataset
+
+Detailed information about the dataset, including data collection, preprocessing, language coverage (9 languages), and dataset statistics can be found in the `Dataset/README.md` file. 
+
+**Key points:**
+- 9 languages: Arabic, English, French, German, Indonesian, Italian, Polish, Portuguese, Spanish
+- Multiple training modes: baseline (single language), all (all languages), zero-shot, all-but-one
+- CSV format with columns: `text` and `label` (0 for normal, 1 for hate speech)
+
+## Models
+
+### 1. BERT Classifier
+
+Uses multilingual BERT with different training strategies. Supports baseline, all-languages, and transfer learning approaches.
+
+**Quick Start:**
+```bash
+cd BERT\ Classifier
+python BERT_training_inference.py
+```
+
+For detailed instructions, see `BERT Classifier/README.md`
+
+### 2. CNN-GRU
+
+CNN-GRU architecture with MUSE word embeddings optimized for social media text with extensive preprocessing.
+
+**Quick Start:**
+```bash
+cd CNN_GRU
+python CNN_GRU.py
+```
+
+For detailed instructions, see `CNN_GRU/README.md`
+
+### 3. XLM-RoBERTa
+
+State-of-the-art cross-lingual RoBERTa model pre-trained on 100+ languages.
+
+**Quick Start:**
+```bash
+cd XLM_RoBERTa
+python download_model.py  # Download pre-trained model
+python XLM_RoBERTa_training_inference.py  # Train model
+python test_xlmr_hatespeech.py  # Evaluate model
+```
+
+For detailed instructions, see `XLM_RoBERTa/README.md`
+
+## Testing and Evaluation
+
+Each model directory contains its own evaluation script with customizable parameters:
+
+- **BERT Classifier:** See `BERT Classifier/README.md` for evaluation instructions
+- **CNN-GRU:** See `CNN_GRU/README.md` for evaluation instructions  
+- **XLM-RoBERTa:** Run `python test_xlmr_hatespeech.py language=<lang> batch_size=<size>` with custom parameters
+
+Results are typically saved as CSV files with metrics (accuracy, F1-score) for each evaluation phase (train/val/test).
+
+## Citation
+
+If you use this implementation, please cite the original DE-LIMIT paper:
+
+```bibtex
 @inproceedings{aluru2021deep,
   title={A Deep Dive into Multilingual Hate Speech Classification},
   author={Aluru, Sai Saketh and Mathew, Binny and Saha, Punyajoy and Mukherjee, Animesh},
@@ -22,76 +123,26 @@ Please look [here](Example/N_Class_model.ipynb) to check model loading and infer
   year={2021},
   organization={Springer International Publishing}
 }
-~~~
+```
 
-------------------------------------------
-***Folder Description*** :point_left:
-------------------------------------------
-~~~
+## Notes
 
-./Dataset             --> Contains the dataset related files.
-./BERT_Classifier     --> Contains the codes for BERT classifiers performing binary classifier on the dataset
-./CNN_GRU	      --> Contains the codes for CNN-GRU model		
-./LASER+LR 	      --> Containes the codes for Logistic regression classifier used on top of LASER embeddings
-
-~~~
-
-## Requirements 
-
-Make sure to use **Python3** when running the scripts. The package requirements can be obtained by running `pip install -r requirements.txt`.
-
-------------------------------------------
-***Dataset***
-------------------------------------------
-Check out the `Dataset ` folder to know more about how we curated the dataset for different languages.  :warning: There are few datasets which requires crawling them hence we can gurantee the retrieval of all the datapoints as tweets may get deleted.
-:warning:
-
------------------------------------------
-***Models used for our this task***
-------------------------------------------
-We release the code for train/finetuning the following models along with their hyperparamters.
-
-:1st_place_medal: `best for high resource language` , :medal_sports: `best for low resource language`
-
-:airplane: `fastest to train`  , :small_airplane: `slowest to train`
-
-1. **mBERT Baseline:**
-	This setting consists of using multilingual bert model with the same language dataset for training and testing. Refer to `BERT Classifier` folder for the codes and usage instructions.
-
-2. **mBERT All_but_one::1st_place_medal::small_airplane:** 
-	This setting consists of using multilingual bert model with training dataset from multiple languages and validation and test from a single target language. Refer to `BERT Classifier` folder for the codes and usage instructions.
-
-3. **Translation + BERT Baseline:**
-	This setting consists of translating the other language datasets to english and finetuning the bert-base model using this translated datasets. Refer to `BERT Classifier` folder for the codes and usage instructions.
-
-4. **CNN+GRU Baseline:**
-	This setting consists of using MUSE word embeddings along with a CNN-GRU based model, and training and testing on the same language. Refer to `CNN_GRU` folder for the codes and usage instructions.
-	
-5. **LASER+LR baseline::airplane:**
-	This setting consists of training a logistic regression model on the LASER embeddings of the dataset. The training and testing dataset are from the same language. Refer to `LASER+LR` folder for the codes and usage instructions.
- 
-6. **LASER+LR all_but_one::medal_sports:**
-	This setting consists of training a logistic regression model on the LASER embeddings of the dataset. The dataset from other languages are also used to train the LR model. Refer to `LASER+LR` folder for the codes and usage instructions.
+- Check individual model README files for model-specific configuration options
+- GPU is recommended for faster training
+- Each model supports different training modes: baseline, all, zero-shot, all-but-one
+- Detailed hyperparameter information is available in each model's README.md
 
 
 	
-### Blogs and github repos which we used for reference :angel:
-1. Muse embeddding are downloaded and extracted using the code from [MUSE github repository](https://github.com/facebookresearch/MUSE)
-2. For finetuning BERT this [blog](https://mccormickml.com/2019/07/22/BERT-fine-tuning/)  by Chris McCormick is used and we also referred [Transformers github repo](https://github.com/huggingface/transformers)
-3. For CNN-GRU model we used the original [repo](https://github.com/ziqizhang/chase) for reference 
-4. For generating the LASER embeddings of the dataset, we used the code from [LASER github repository](https://github.com/facebookresearch/LASER)
+### References
 
-### For more details about our paper
+The original DE-LIMIT implementation and baseline models:
+- Original Paper: [Deep Learning Models for Multilingual Hate Speech Classification](https://arxiv.org/abs/2004.06465)
+- Original Code: [CNERG DE-LIMIT Repository](https://github.com/hate-alert/DE-LIMIT)
+- Original BERT Models: [HuggingFace Hub - Hate-speech-CNERG](https://huggingface.co/Hate-speech-CNERG)
 
-Sai Saketh Aluru, Binny Mathew, Punyajoy Saha and Animesh Mukherjee. 2020. "[Deep Learning Models for Multilingual Hate Speech Detection](https://arxiv.org/abs/2004.06465)". ECML-PKDD
-
-
-
-### Todos
-- [x] Upload our models to [transformers community](https://huggingface.co/models) to make them public
-- [x] Add arxiv paper link and description
-- [ ] Create an interface for **social scientists** where they can use our models easily with their data
-- [ ] Create a pull request to add the models to official [transformers repo](https://github.com/huggingface/transformers)
-
-
-#####  :thumbsup: The repo is still in active developements. Feel free to create an [issue](https://github.com/punyajoy/DE-LIMIT/issues) !!  :thumbsup:
+Referenced implementations:
+1. MUSE embeddings from [Facebook MUSE Repository](https://github.com/facebookresearch/MUSE)
+2. BERT fine-tuning approach from [Chris McCormick's Blog](https://mccormickml.com/2019/07/22/BERT-fine-tuning/)
+3. CNN-GRU original implementation from [CHASE Repository](https://github.com/ziqizhang/chase)
+4. LASER embeddings from [Facebook LASER Repository](https://github.com/facebookresearch/LASER)

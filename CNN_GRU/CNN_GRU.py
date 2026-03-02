@@ -284,14 +284,29 @@ def cnn_gru_train_model(params):
                                                 
                                                 
                                                 
-                                                
-                                                
-                                                
-                                                
-                                                
-                                                
-                                                
-                                                
+# Explanation of all the params used below. 
+
+# 'logging':where logging {'local','neptune'}
+# 'language': language {'Arabic', 'English','German','Indonesian','Italian','Polish','Portugese','Spanish','French'}
+# 'is_train': whether train dataset 
+# 'is_model':is model 
+# 'learning_rate':Adam parameter lr
+# 'files': Path to the dataset folder ( containing the train, val and test subfolders)
+# 'csv_file': The regex used by glob to load the datasets. {'*_full.csv','*_translated.csv'} for untranslated and translated datasets respectively
+# 'samp_strategy': The way in which we sample the training data points. {'stratified'}
+# 'epsilon': Adam parameter episilon
+# 'path_files':bert path from where the bert model should be loaded,
+# 'take_ratio': Whether the sample ratio is ratio of total points or absolute number of points needed.
+# 'sample_ratio':ratio or the number of the training data points to take
+# 'how_train':how the bert is trained possible option {'all','baseline','all_but_one'}
+# 'epochs': number of epochs to train bert
+# 'batch_size': batch size
+# 'to_save': whether to save the model or not
+# 'weights': weights for binary classifier
+# 'what_bert': type of bert possible option {'normal','weighted'}
+# 'save_only_bert': if only bert (without classifier) should be used 
+# 'max_length': maximum length for input tokenization
+# 'random_seed': seed value for reproducibility                                        
                                                 
                                                 
                                                 
