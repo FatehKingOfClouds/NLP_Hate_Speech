@@ -48,16 +48,16 @@ except:
 
 def train_model(params,best_val_fscore):
 	
-	# In case of english languages, translation is the origin data itself.
-	if(params['language']=='English'):
-		csv_pattern='*_full.csv'
-	else:
-		csv_pattern='*_translated.csv'
-	
-	# Filter by language name to load only that language's dataset
-	# Use os.path.join for proper path construction on Windows
-	train_path=os.path.join(params['files'], 'train', params['language']+'*_full.csv')
-	val_path=os.path.join(params['files'], 'val', params['language']+'*_full.csv')
+	# Determine which CSV file pattern to use based on training mode
+	# For 'all' mode: use *_full.csv (untranslated) for all languages
+	# For 'baseline' mode: use language-specific *_full.csv
+	if(params['how_train']=='baseline'):
+		train_path=os.path.join(params['files'], 'train', params['language']+'*_full.csv')
+		val_path=os.path.join(params['files'], 'val', params['language']+'*_full.csv')
+	elif(params['how_train']=='all'):
+		# For 'all' mode, load all *_full.csv files (untranslated data)
+		train_path=os.path.join(params['files'], 'train', '*_full.csv')
+		val_path=os.path.join(params['files'], 'val', '*_full.csv')
 
 	# Load the training and validation datasets
 	train_files=glob.glob(train_path)
@@ -252,7 +252,7 @@ def train_model(params,best_val_fscore):
 
 params={
 	'logging':'local',
-	'language':'French',
+	'language':'Arabic',
 	'is_train':True,
 	'is_model':True,
 	'learning_rate':2e-5,
@@ -263,8 +263,8 @@ params={
 	'path_files':'./BERT Classifier/multilingual_bert',
 	'take_ratio':False,
 	'sample_ratio':16,
-	'how_train':'baseline',
-	'epochs':5,
+	'how_train':'all',
+	'epochs':3,
 	'batch_size':16,
 	'to_save':True,
 	'weights':[1.0,1.0],

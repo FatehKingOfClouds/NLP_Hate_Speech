@@ -9,7 +9,7 @@
 	5. Set the `how_train` parameter in `BERT_training_inference.py` to `baseline`, and set the parameters `sample_ratio`, `take_ratio`, and `samp_strategy` depending on the experiment setting. 
 	6. Call the train_model function. It trains the bert model with the dataset given, for the specified number of epochs. Use the parameter `to_save` for saving the model at the epoch having best validation scores.
 
-2. **mBERT All_but_one**
+2. **mBERT All**
 	1. Similar to the instructions above, set the required parameters for target language, bert model to be used and sample ratio of the target dataset.
 	2. Set the `how_train` parameter to `all_but_one`. Now data_loader function will load the datasets all other language fully, and the dataset for the target language in the given sample ratio. 
 
