@@ -1,5 +1,6 @@
 import neptune
 import numpy as np
+import os
 from Models.modelUtils import *
 from Models.torchDataGen import *
 
@@ -56,13 +57,73 @@ def load_vec(emb_path, nmax=50000):
     embeddings = np.vstack(vectors)
     return embeddings, id2word, word2id
 
+# Function to evaluate CNN-GRU model
+def Eval_phase_cnngru(params, phase, model, data):
+    """Evaluate the CNN-GRU model on train/val/test data"""
+    # Determine device
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    
+    model.eval()
+    
+    # Create dataloader for evaluation
+    eval_dataloader = return_cnngru_dataloader(data, batch_size=params['batch_size'], is_train=False)
+    
+    all_predictions = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for batch in eval_dataloader:
+            # Get batch data
+            if len(batch) >= 2:
+                b_input_ids = batch[0].to(device)
+                b_labels = batch[1].to(device)
+            else:
+                continue
+            
+            # Get model predictions
+            outputs = model(b_input_ids)
+            
+            # Get predicted class
+            if isinstance(outputs, tuple):
+                logits = outputs[0]
+            else:
+                logits = outputs
+            
+            # Handle case where batch size=1 and squeeze removes batch dimension
+            if logits.dim() == 1:
+                logits = logits.unsqueeze(0)
+            
+            predictions = torch.argmax(logits, dim=1)
+            
+            all_predictions.extend(predictions.cpu().numpy())
+            all_labels.extend(b_labels.cpu().numpy())
+    
+    # Calculate metrics
+    fscore = f1_score(all_labels, all_predictions, average='binary', zero_division=0)
+    accuracy = accuracy_score(all_labels, all_predictions)
+    
+    model.train()
+    return fscore, accuracy
+
+
 # Main training function
 
 def cnn_gru_train_model(params):
+    # Determine file paths based on training mode
+    if(params['how_train']=='baseline'):
+        train_path=os.path.join(params['files'], 'train', params['language']+'*_full.csv')
+        val_path=os.path.join(params['files'], 'val', params['language']+'*_full.csv')
+        test_path=os.path.join(params['files'], 'test', params['language']+'*_full.csv')
+    else:
+        # For 'all' mode, load all *_full.csv files (untranslated data)
+        train_path=os.path.join(params['files'], 'train', '*_full.csv')
+        val_path=os.path.join(params['files'], 'val', '*_full.csv')
+        test_path=os.path.join(params['files'], 'test', '*_full.csv')
+    
     # Load the datasets
-    train_path=params['files']+'/train/'+params['csv_file']
-    val_path=params['files']+'/val/'+params['csv_file'] 
-    test_path=params['files']+'/test/'+params['csv_file']
     train_files=glob.glob(train_path)
     val_files=glob.glob(val_path)
     test_files=glob.glob(test_path)
@@ -90,7 +151,9 @@ def cnn_gru_train_model(params):
     
     model=select_model(params,merged_vec)
     # Tell pytorch to run this model on the GPU.
-    model.cuda()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    print(f"CNN-GRU model on: {device}")
 
 
     optimizer = AdamW(model.parameters(),
@@ -234,7 +297,7 @@ def cnn_gru_train_model(params):
                                                 
 params={
     'logging':'local',
-    'language':'German',
+    'language':'English',
     'is_train':True,
     'is_model':True,
     'learning_rate':1e-4,
@@ -245,8 +308,8 @@ params={
     'path_files':'cnngru',
     'take_ratio':True,
     'sample_ratio':100,
-    'how_train':'baseline',
-    'epochs':20,
+    'how_train':'all',
+    'epochs':5,
     'batch_size':16,
     'to_save':True,
     'weights':[1.0,1.0],
@@ -264,43 +327,10 @@ params={
     
     
 if __name__=='__main__':
-    neptune.init(project_name,api_token=api_token,proxies=proxies)
-    neptune.set_project(project_name)
 
-    lang_map={'Arabic':'ar','French':'fr','Portugese':'pt','Spanish':'es','English':'en','Indonesian':'id','Italian':'it','German':'de','Polish':'pl'}
-    torch.cuda.set_device(0)
-    lang_list=list(lang_map.keys())
-    for lang in lang_list[6:9]:
-      params['language']=lang
-      #params['path_files']='models_saved/multilingual_bert_'+lang+'_translated_all_but_one_100_only_bert'
-      if(lang !='Portugese'):
-
-          for sample_ratio,take_ratio in [(16,False),(32,False),(64,False),(128,False),(256,False)]:
-              count=0
-              params['take_ratio']=take_ratio
-              params['sample_ratio']=sample_ratio
-              for lr in [2e-4,3e-4,5e-4]:
-                
-                  params['learning_rate']=lr
-                  for ss in ['stratified']:
-                      params['samp_strategy']=ss
-                      for seed in [2018,2019,2020,2021,2022]:
-                          params['random_seed']=seed
-                          count+=1
-                          cnn_gru_train_model(params)
-
-
-        
-      for lr in [2e-4,3e-4,5e-4]:
-          params['learning_rate']=lr
-          params['samp_strategy']='stratified'
-          params['take_ratio']=True
-          params['sample_ratio']=100
-          for seed in [2018,2019,2020,2021,2022]:
-              params['random_seed']=seed
-              cnn_gru_train_model(params)
-      print('============================')
-      print('Model for Language',lang,'is trained')
-      print('============================')
+	cnn_gru_train_model(params)
+	print('============================')
+	print(f'Model for Language {params["language"]} trained successfully!')
+	print('============================' )
     
     #train_model(params)

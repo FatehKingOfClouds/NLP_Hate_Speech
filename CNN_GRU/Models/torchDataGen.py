@@ -40,7 +40,9 @@ def pad(iterable, size, padding=None):
 def encode_data(df,word2id):
         max_len=0
         for index,row in tqdm(df.iterrows(),total=len(df)):
-            
+            # Skip rows with NaN or non-string text
+            if pd.isna(row["text"]) or not isinstance(row["text"], str):
+                continue
             if(max_len<len(row["text"].split(' '))):
                 max_len=len(row["text"].split(' '))
         
@@ -48,6 +50,9 @@ def encode_data(df,word2id):
         
         
         for index,row in df.iterrows():
+            # Skip rows with NaN or non-string text
+            if pd.isna(row["text"]) or not isinstance(row["text"], str):
+                continue
             list_token_id=[]
             words=row['text'].split(' ')
             for word in words:
