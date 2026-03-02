@@ -264,7 +264,7 @@ params={
 	'take_ratio':False,
 	'sample_ratio':16,
 	'how_train':'all',
-	'epochs':3,
+	'epochs':5,
 	'batch_size':16,
 	'to_save':True,
 	'weights':[1.0,1.0],
