@@ -18,6 +18,6 @@
 
 3. **Evaluation**
     1. Run `python test_xlmr_hatespeech.py` to evaluate the model on test data.
-    2. You can pass parameters via command-line arguments: `python test_xlmr_hatespeech.py language=Arabic batch_size=32`
+    2. You can pass parameters via command-line arguments: `python test_xlmr_hatespeech.py language=Arabic batch_size=16`
     3. Available parameters: `model_path`, `files`, `language`, `batch_size`, `max_length`
     4. Results are saved to `DE-LIMIT_xlmr_results.csv` with timing information for each phase.
