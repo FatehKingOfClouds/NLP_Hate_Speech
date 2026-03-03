@@ -45,7 +45,7 @@ DE-LIMIT-master/
 
 ## Requirements
 
-Make sure to use **Python 3.8+**. Install dependencies with:
+Make sure to use **Python 3.11.9**. Install dependencies with:
 
 ```bash
 pip install -r requirements.txt
